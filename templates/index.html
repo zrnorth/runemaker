@@ -4,10 +4,16 @@
 
     <form action="{{ url_for('get_rune_pages') }}" method="post">
         <dl>
-            <dt>What champions do you play?
-            <dd><input type="text" name="champNames">
             <dt>How many runepages do you have?
             <dd><input type="text" name="numPages">
+            <dt>Check all the champions that you play:
+            {% for champ in champNameList %}
+            <dd>
+                <label>
+                    <input type="checkbox" name="champs" value="{{ champ }}">
+                    {{ champ }}
+                </label>
+            {% endfor %}
             <dd><input type="submit" value="Submit">
         </dl>
     </form>

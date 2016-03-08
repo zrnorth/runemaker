@@ -3,6 +3,7 @@ Contains the logic to make a rune set based on player input.
 """
 
 from . import championgg_api
+from . import riot_api
 from . import util
 
 def get_runes_for_champs(champions):
@@ -102,6 +103,13 @@ def get_runepages(championList, maxPages):
             leftOut.append( (key, merged[key]) )
             
     return { 'results': results, 'leftOut': leftOut }
+    
+def get_champion_list():
+    """
+    Gets all champions currently in the game.
+    """
+    riot_api.setup()
+    return riot_api.get_all_champion_names()
     
 def main():
     maxPages = int(input("How many rune pages do you own? "))

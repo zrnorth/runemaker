@@ -5,6 +5,7 @@ import os
 import json
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
+from . import riot_api
 
 # Globals
 SETUP = False
@@ -57,4 +58,3 @@ def rune_group_shorthand(runeGroup):
     if num > 1:
         str += "s"
     return str
-    
