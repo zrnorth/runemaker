@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <link rel="stylesheet" type=text/css href="static/style.css" />
+    <title>Runemaker</title>
+    {% endblock %}
+</head>
+<body>
+    <div class="page">
+        <h1>Runemaker</h1>
+        <div id="content">{% block content %}{% endblock %}</div>
+    </div>
+</body>
+</html>

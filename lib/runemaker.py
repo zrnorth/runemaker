@@ -2,9 +2,8 @@
 Contains the logic to make a rune set based on player input.
 """
 
-import championgg_api
-import util
-import pprint
+from . import championgg_api
+from . import util
 
 def get_runes_for_champs(champions):
     """
@@ -49,10 +48,18 @@ def merge_all_common_runesets(champRoleRunesList):
     
     return dict
     
-def get_runepages(championList, maxPages):
+def get_runepages_printer(results, startNum):
+    for result in results:
+        runes = result[0]
+        score = result[1][0]
+        champRolesList = result[1][1]
+        
+        print( ("RUNE PAGE {0}: {1}\nUsed by {2} roles: {3}\n").format(startNum, runes, score, champRolesList) )
+        startNum += 1
+    
+def print_runepages(championList, maxPages):
     """
-    Given a list of champions and a maximum number of pages, returns a mapping of
-    runepages to champions they are used for. Also returns a list of "left-out" champs.
+    Same as below, but pretty prints the data rather than returning it. For cmdline use
     """
     runeSets = get_runes_for_champs(championList)
     merged = merge_all_common_runesets(runeSets)
@@ -74,14 +81,27 @@ def get_runepages(championList, maxPages):
         print("\nThese pages were left out: ")
         get_runepages_printer(leftOut, 1+len(results))
        
-def get_runepages_printer(results, startNum):
-    for result in results:
-        runes = result[0]
-        score = result[1][0]
-        champRolesList = result[1][1]
-        
-        print( ("RUNE PAGE {0}: {1}\nUsed by {2} roles: {3}\n").format(startNum, runes, score, champRolesList) )
-        startNum += 1
+def get_runepages(championList, maxPages):
+    """
+    Given a list of champions and a maximum number of pages, returns a mapping of
+    runepages to champions they are used for. Also returns a list of "left-out" champs.
+    """
+    
+    runeSets = get_runes_for_champs(championList)
+    merged = merge_all_common_runesets(runeSets)
+    
+    results = []
+    leftOut = []
+    count = 0
+    # Sort by the "score" of a runepage, to remove the ones that are too low in priority (if necessary)
+    for key in sorted(merged, key=merged.get, reverse=True):
+        if count < maxPages:
+            results.append( (key, merged[key]) )
+            count += 1
+        else:
+            leftOut.append( (key, merged[key]) )
+            
+    return { 'results': results, 'leftOut': leftOut }
     
 def main():
     maxPages = int(input("How many rune pages do you own? "))
