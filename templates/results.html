@@ -1,14 +1,33 @@
 {% extends "_base.html" %}
 {% block content %}
     <h2>Here are your pages.</h2>
-    <dl>
-        <dt>Here is the rune data:
-            {% for runes in results %}
-            <dd> {{ runes }}
-            {% endfor %}
-        <dt>These were left out:
-            {% for runes in leftOut %}
-            <dd> {{ runes }}
-            {% endfor %}
-    </dl>
+    <ol>
+        {% for runes in results %}
+        <li>
+            <p>{{ runes[0] }}.</p>
+            <p>You would use this page for these {{ runes[1][0] }} roles:
+            <ul>
+                {% for role in runes[1][1] %}
+                    <li>{{role}}</li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ol>
+    {% if leftOut|length > 0 %}
+    <p>If you had more rune pages, you could build these as well.
+    <ol>
+        {% for runes in leftOut %}
+        <li>
+            <p>{{ runes[0] }}.</p>
+            <p>You would use this page for these {{ runes[1][0] }} roles:
+            <ul>
+                {% for role in runes[1][1] %}
+                    <li>{{role}}</li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ol>
+    {% endif %}
 {% endblock %}
