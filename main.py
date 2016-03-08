@@ -13,8 +13,8 @@ app.config.from_object(__name__)
         
 @app.route('/')
 def show_entries():
-    champNameList = runemaker.get_champion_list()
-    return render_template('index.html', champNameList=sorted(champNameList))
+    champNameZippedList = runemaker.get_champion_list()
+    return render_template('index.html', champNameZippedList=sorted(champNameZippedList))
     
 @app.route('/getRunePages', methods=['POST'])
 def get_rune_pages():

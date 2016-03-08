@@ -107,6 +107,7 @@ def get_runepages(championList, maxPages):
 def get_champion_list():
     """
     Gets all champions currently in the game.
+    Returns a zipped up list of (dataNames, prettyName) of all champs in the game.
     """
     riot_api.setup()
     return riot_api.get_all_champion_names()

@@ -7,11 +7,15 @@
             <dt>How many runepages do you have?
             <dd><input type="text" name="numPages">
             <dt>Check all the champions that you play:
-            {% for champ in champNameList %}
+            {% for champDataName, champPrettyName in champNameZippedList %}
             <dd>
                 <label>
-                    <input type="checkbox" name="champs" value="{{ champ }}">
-                    {{ champ }}
+                    <img src="http://ddragon.leagueoflegends.com/cdn/6.5.1/img/champion/{{champDataName}}.png"
+                         alt="{{ champDataName }}"
+                         height="50"
+                         width="50">
+                    <input type="checkbox" name="champs" value="{{ champDataName }}">
+                    {{ champPrettyName }}
                 </label>
             {% endfor %}
             <dd><input type="submit" value="Submit">

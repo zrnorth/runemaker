@@ -84,4 +84,5 @@ def get_all_champion_names():
     Helper to get a list of all the champions in the game currently, from riot's api.
     """
     champ_dict = get_champion_list(champData="all").json()['data']
-    return list(champ_dict.keys())
+    return list(zip(list(champ_dict.keys()), [x['name'] for x in champ_dict.values()]))
+    
