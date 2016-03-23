@@ -1,24 +1,7 @@
 {% extends "_base.html" %}
 {% block content %}
-    <h2>This is a tool to help you make the most efficient rune pages for your champion pool.</h2>
-
-    <form action="{{ url_for('get_rune_pages') }}" method="post">
-        <dl>
-            <dt>How many runepages do you have?
-            <dd><input type="text" name="numPages">
-            <dt>Check all the champions that you play:
-            {% for champDataName, champPrettyName in champNameZippedList %}
-            <dd>
-                <label>
-                    <img src="http://ddragon.leagueoflegends.com/cdn/6.5.1/img/champion/{{champDataName}}.png"
-                         alt="{{ champDataName }}"
-                         height="50"
-                         width="50">
-                    <input type="checkbox" name="champs" value="{{ champDataName }}">
-                    {{ champPrettyName }}
-                </label>
-            {% endfor %}
-            <dd><input type="submit" value="Submit">
-        </dl>
-    </form>
+    <ul>
+        <li><a href="/runemaker">Runemaker</a></li>
+        <li><a href="/rolemaker">Rolemaker</a></li>
+    </ul>
 {% endblock %}

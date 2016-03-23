@@ -115,7 +115,6 @@ def get_champion_list():
 def main():
     maxPages = int(input("How many rune pages do you own? "))
     champs = input("What champs are you interested in playing? Seperate with commas. ").split(', ')
-    print(champs)
     get_runepages(champs, maxPages)
 
 if __name__ == "__main__":
