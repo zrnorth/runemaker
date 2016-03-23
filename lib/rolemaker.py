@@ -13,7 +13,7 @@ def make_champ_list(champ_stats, numRoles):
     # Basic: just get the top 5 by winrate.
     winrateSort = sorted(list(champ_stats), key=lambda x: (champ_stats[x]['winPercent']), reverse=True)
 
-    return winrateSort[:5]
+    return winrateSort[:numRoles]
 
 def get_role_stats(role):
     """
@@ -27,7 +27,8 @@ def get_role_stats(role):
     for entry in data:
         # Fill out the entry with simple data at first.
         general = entry['general']
-        champion = entry['key']
+        championInternalName = entry['key']
+        champion = entry['name']
         
         champ_info = {}
         champ_info['winPercent'] = general['winPercent']
@@ -38,7 +39,8 @@ def get_role_stats(role):
         rank_counter += 1
 
         # For more complex data, we need to use a diff api call
-        advanced_data_list = championgg_api.get_champion_data(champion)
+        advanced_data_list = championgg_api.get_champion_data(championInternalName)
+
         for item in advanced_data_list:
             if item['role'] == role:
                 advanced_data = item
@@ -47,18 +49,29 @@ def get_role_stats(role):
         champ_info['pastPatchWinPercent'] = advanced_data['patchWin']
         champ_info['pastPatchPlayPercent'] = advanced_data['patchPlay']
         champ_info['winrateByExperience'] = advanced_data['experienceRate']
-        champ_info['dmgComposition'] = advanced_data['dmgComposition']
-        
-        role_stats[champion] = champ_info
+       
+        adDmg = advanced_data['dmgComposition']['physicalDmg']
+        apDmg = advanced_data['dmgComposition']['magicDmg']
+        trueDmg = advanced_data['dmgComposition']['trueDmg']
 
+        # Could use tuning? Works for now.
+        if (adDmg + trueDmg > 70):
+            champ_info['dmgType'] = 'AD'
+        elif (apDmg + trueDmg > 70):
+            champ_info['dmgType'] = 'AP'
+        else:
+            champ_info['dmgType'] = 'Hybrid'
+
+        role_stats[champion] = champ_info
 
     return role_stats
 
 def main():
     role = str(raw_input("Role? "))
+    num = int(raw_input("Number of champs? "))
     champ_stats = get_role_stats(role)
 
-    top_five = make_champ_list(champ_stats, 5)
+    top_five = make_champ_list(champ_stats, num)
     print(top_five)
 
 if __name__ == "__main__":
