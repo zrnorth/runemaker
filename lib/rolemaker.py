@@ -2,6 +2,7 @@
 Contains the logic to make a role champ set based on player input.
 """
 import championgg_api
+import util
 import pprint
 
 def make_champ_list(champ_stats, numRoles):
@@ -10,10 +11,22 @@ def make_champ_list(champ_stats, numRoles):
     a variety of statistics.
 
     """
-    # Basic: just get the top 5 by winrate.
-    winrateSort = sorted(list(champ_stats), key=lambda x: (champ_stats[x]['winPercent']), reverse=True)
+    sort = sorted(list(champ_stats), key=lambda x: (champ_stats[x]['score']), reverse=True)
 
-    return winrateSort[:numRoles]
+    return sort[:numRoles]
+
+def calculate_score(champ_info):
+    """
+    Calculate the 'score' for this champion, based on our weighting score system
+    """
+    weights = util.get_defined_champ_role_weights()
+
+    score = 0
+    score += champ_info['winPercent'] * weights['winrate']
+    score += champ_info['banPercent'] * weights['banrate']
+    score += champ_info['playPercent'] * weights['playrate']
+
+    return score
 
 def get_role_stats(role):
     """
@@ -61,6 +74,10 @@ def get_role_stats(role):
             champ_info['dmgType'] = 'AP'
         else:
             champ_info['dmgType'] = 'Hybrid'
+        
+        champ_info['score'] = calculate_score(champ_info)
+
+        print(champion + " | " + str(champ_info['score']))
 
         role_stats[champion] = champ_info
 

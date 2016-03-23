@@ -5,7 +5,7 @@ import os
 import json
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
-from . import riot_api
+import riot_api
 
 # Globals
 SETUP = False
@@ -15,15 +15,17 @@ def setup():
     """
     Get setup for calls, getting the api keys from the config file.
     """
-    global SETUP, RUNE_INFO
-    dataLocation = os.path.realpath(os.path.join(__location__, "../data"))
-    with open(os.path.join(dataLocation, 'rune_info.js'), 'r') as f:
-        try:
-            runeList = json.load(f)
-            convertRuneListToDict(runeList)
-        except ValueError:
-            RUNE_DICT = {}
-    SETUP = True
+    global SETUP, RUNE_DICT
+    if not SETUP:
+        dataLocation = os.path.realpath(os.path.join(__location__, "../data"))
+        with open(os.path.join(dataLocation, 'rune_info.json'), 'r') as f:
+            try:
+                runeList = json.load(f)
+                convertRuneListToDict(runeList)
+            except ValueError:
+                RUNE_DICT = {}
+        SETUP = True
+
     
 def convertRuneListToDict(runeList):
     """
@@ -48,8 +50,7 @@ def rune_group_shorthand(runeGroup):
     output: "9x Magic Pen Reds"
     
     """
-    if not SETUP:
-        setup()
+    setup()
         
     id = runeGroup['id']
     num = runeGroup['number']
@@ -58,3 +59,13 @@ def rune_group_shorthand(runeGroup):
     if num > 1:
         str += "s"
     return str
+
+def get_defined_champ_role_weights():
+    """
+    Helper to get the defined score weights from the weight_config file.
+    """
+    dataLocation = os.path.realpath(os.path.join(__location__, "../data"))
+    with open(os.path.join(dataLocation, 'weight_config.json'), 'r') as f:
+        weights = dict(json.load(f))
+        return weights
+
