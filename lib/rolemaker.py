@@ -7,13 +7,82 @@ import statistics
 import time
 import util
 
-def make_champ_list(role_stats, num):
+def make_champ_pool(role, role_stats, num):
     """
-    Construct a list of champions for a role, based on
-    a variety of statistics.
+    Construct a list of champions for a role.
+    """
 
-    """
-    return sorted(list(role_stats), key=lambda x: (role_stats[x]['score']), reverse=True)[:num]
+    # ideally we want to have champs from at least 2 / 3 of the major types (AP, AD, Hybrid).
+    # However, if we are playing ADC / Support, or we have num = 1, this doesn't really matter
+    # - just return the best champs based on overall score.
+    if role == "ADC" or role == "Support" or num == 1:
+        return sorted(list(role_stats), key=lambda x: (role_stats[x]['score']), reverse=True)[:num]
+
+    ap = []
+    ad = []
+    hybrid = []
+    for champ in role_stats:
+        champ_data = role_stats[champ]
+        dmg_type = champ_data['dmgType']
+        score = champ_data['score']
+
+        if dmg_type is 'AD':
+            ad.append((champ, score))
+        elif dmg_type is 'AP':
+            ap.append((champ, score))
+        else:
+            hybrid.append((champ, score))
+
+    ad.sort(key=lambda x: x[1], reverse=True)
+    ap.sort(key=lambda x: x[1], reverse=True)
+    hybrid.sort(key=lambda x: x[1], reverse=True)
+
+    print(ad)
+    print(ap)
+    print(hybrid)
+
+    pool = []
+    got_ad = False
+    got_ap = False
+    got_hybrid = False
+
+    while len(pool) < num - 1:
+        highest_ad = ad[0][1]
+        highest_ap = ap[0][1]
+        highest_hybrid = hybrid[0][1]
+
+        biggest = max(highest_ad, highest_ap, highest_hybrid)
+        if highest_ad == biggest:
+            pool.append(ad[0][0])
+            got_ad = True
+            del ad[0]
+        elif highest_ap == biggest:
+            pool.append(ap[0][0])
+            got_ap = True
+            del ap[0]
+        elif highest_hybrid == biggest:
+            pool.append(hybrid[0][0])
+            got_hybrid = True
+            del hybrid[0]
+    # We have one spot left -- if we are still all of one type now, need to get another one.
+    if got_ad and not got_ap and not got_hybrid:
+        if (ap[0][1] > hybrid[0][1]):
+            pool.append(ap[0][0])
+        else:
+            pool.append(hybrid[0][0])
+    if not got_ad and got_ap and not got_hybrid:
+        if (ad[0][1] > hybrid[0][1]):
+            pool.append(ad[0][0])
+        else:
+            pool.append(hybrid[0][0])
+    if not got_ad and not got_ap and got_hybrid:
+        if (ad[0][1] > ap[0][1]):
+            pool.append(ad[0][0])
+        else:
+            pool.append(ap[0][0])
+
+    return pool
+
 
 def calculate_score(champ_info, agg_stats):
     """
@@ -28,28 +97,27 @@ def calculate_score(champ_info, agg_stats):
    
     # Banrate score (penalty) is a step function. If below avg, the penalty is 0.
     # If above avg, the penalty is (weight * deviation)
+    # If more than a standard deviation above the mean, there is an additional penalty.
     banrate_diff = champ_info['banrate'] - agg_stats['banrate']['mean']
     if banrate_diff < 0:
         banrate_score = 0
     else:
         banrate_score = -1 * banrate_diff * weights['banrate']
 
+    if banrate_diff > agg_stats['banrate']['stddev']:
+        banrate_score -= weights['banrate_outlier']
+
     # Playrate score is a step function:
     # If between a stddev below / above avg, the score is 0
     # Else, the score is -deviation * weight (low = positive score, high = negative)
     playrate_diff = champ_info['playrate'] - agg_stats['playrate']['mean']
+
     if abs(playrate_diff) > agg_stats['playrate']['stddev']:
         playrate_score = -1 * playrate_diff * weights['playrate']
     else: 
         playrate_score = 0
 
-
-    print("Winrate score: " + str(winrate_score))
-    print("Banrate score: " + str(banrate_score))
-    print("Playrate score: " + str(playrate_score))
-
     score = winrate_score + banrate_score + playrate_score
-    print("Total: " + str(score))
 
     return score
 
@@ -94,7 +162,7 @@ def get_role_stats(role):
         championInternalName = entry['key']
         champion = entry['name']
 
-        print(champion + "...")
+        print("Processing " + champion + "...")
         
         champ_info = {}
         champ_info['winrate'] = general['winPercent']
@@ -138,18 +206,15 @@ def get_role_stats(role):
 
     # Finally, use these stats to calculate a score for each champ
     for champ in role_stats:
-        print(champ)
         role_stats[champ]['score'] = calculate_score(role_stats[champ], agg_stats)
-
     return (agg_stats, role_stats)
 
 def main():
     role = str(raw_input("Role? "))
     num = int(raw_input("Number of champs? "))
     agg_stats, role_stats = get_role_stats(role)
-    champ_list = make_champ_list(role_stats, num)
-    print(champ_list)
+    champ_pool = make_champ_pool(role, role_stats, num)
+    print("Your champ pool is: " + ", ".join(champ_pool))
 
 if __name__ == "__main__":
     main()
-    input()

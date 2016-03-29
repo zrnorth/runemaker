@@ -1,5 +1,6 @@
 {
-    "winrate": 10,
+    "winrate": 7,
     "banrate": 1,
-    "playrate": 1
+    "banrate_outlier": 5,
+    "playrate": 0.7
 }
