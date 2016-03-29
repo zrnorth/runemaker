@@ -1,5 +1,5 @@
 {
     "winrate": 10,
-    "banrate": -5,
-    "playrate": -1
+    "banrate": 1,
+    "playrate": 1
 }

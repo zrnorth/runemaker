@@ -15,16 +15,41 @@ def make_champ_list(role_stats, num):
     """
     return sorted(list(role_stats), key=lambda x: (role_stats[x]['score']), reverse=True)[:num]
 
-def calculate_score(champ_info):
+def calculate_score(champ_info, agg_stats):
     """
     Calculate the 'score' for this champion, based on our weighting score system
+    and aggregated stats about the role pool
     """
     weights = util.get_defined_champ_role_weights()
 
-    score = 0
-    score += champ_info['winrate'] * weights['winrate']
-    score += champ_info['banrate'] * weights['banrate']
-    score += champ_info['playrate'] * weights['playrate']
+    # Winrate score is based on a linear progression of how much better than avg the champ is.
+    winrate_diff = champ_info['winrate'] - agg_stats['winrate']['mean']
+    winrate_score = winrate_diff * weights['winrate']
+   
+    # Banrate score (penalty) is a step function. If below avg, the penalty is 0.
+    # If above avg, the penalty is (weight * deviation)
+    banrate_diff = champ_info['banrate'] - agg_stats['banrate']['mean']
+    if banrate_diff < 0:
+        banrate_score = 0
+    else:
+        banrate_score = -1 * banrate_diff * weights['banrate']
+
+    # Playrate score is a step function:
+    # If between a stddev below / above avg, the score is 0
+    # Else, the score is -deviation * weight (low = positive score, high = negative)
+    playrate_diff = champ_info['playrate'] - agg_stats['playrate']['mean']
+    if abs(playrate_diff) > agg_stats['playrate']['stddev']:
+        playrate_score = -1 * playrate_diff * weights['playrate']
+    else: 
+        playrate_score = 0
+
+
+    print("Winrate score: " + str(winrate_score))
+    print("Banrate score: " + str(banrate_score))
+    print("Playrate score: " + str(playrate_score))
+
+    score = winrate_score + banrate_score + playrate_score
+    print("Total: " + str(score))
 
     return score
 
@@ -37,9 +62,9 @@ def get_stats_for_field(role_stats, field):
         l.append(role_stats[champ][field])
     
     return {
-        "mean": str(statistics.mean(l)),
-        "median": str(statistics.median(l)),
-        "stddev": str(statistics.stdev(l))
+        "mean": statistics.mean(l),
+        "median": statistics.median(l),
+        "stddev": statistics.stdev(l)
     }
 
 def get_role_stats(role):
@@ -113,8 +138,8 @@ def get_role_stats(role):
 
     # Finally, use these stats to calculate a score for each champ
     for champ in role_stats:
-        role_stats[champ]['score'] = calculate_score(role_stats[champ])
-        print(champ + " | " + str(role_stats[champ]))
+        print(champ)
+        role_stats[champ]['score'] = calculate_score(role_stats[champ], agg_stats)
 
     return (agg_stats, role_stats)
 
@@ -124,7 +149,6 @@ def main():
     agg_stats, role_stats = get_role_stats(role)
     champ_list = make_champ_list(role_stats, num)
     print(champ_list)
-    print(agg_stats)
 
 if __name__ == "__main__":
     main()
