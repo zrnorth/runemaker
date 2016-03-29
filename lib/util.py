@@ -10,32 +10,41 @@ import riot_api
 # Globals
 SETUP = False
 RUNE_DICT = {}
+WEIGHTS = {}
 
 def setup():
     """
     Get setup for calls, getting the api keys from the config file.
     """
-    global SETUP, RUNE_DICT
+    global SETUP, RUNE_DICT, WEIGHTS
     if not SETUP:
-        dataLocation = os.path.realpath(os.path.join(__location__, "../data"))
-        with open(os.path.join(dataLocation, 'rune_info.json'), 'r') as f:
+        data_location = os.path.realpath(os.path.join(__location__, "../data"))
+
+        with open(os.path.join(data_location, 'rune_info.json'), 'r') as f:
             try:
-                runeList = json.load(f)
-                convertRuneListToDict(runeList)
+                rune_list = json.load(f)
+                convert_rune_list_to_dict(rune_list)
             except ValueError:
                 RUNE_DICT = {}
+
+        with open(os.path.join(data_location, 'weight_config.json'), 'r') as f:
+            try:
+                WEIGHTS = dict(json.load(f))
+            except ValueError:
+                WEIGHTS = {}
+
         SETUP = True
 
     
-def convertRuneListToDict(runeList):
+def convert_rune_list_to_dict(rune_list):
     """
     We want to take our list of all types of runes, and change it to a 
     dict with the rune id as a key.
     """
-    for runeType in runeList:
-        key = runeType['id']
-        del runeType['id']
-        value = runeType
+    for rune_type in rune_list:
+        key = rune_type['id']
+        del rune_type['id']
+        value = rune_type
         RUNE_DICT[key] = value
     
 def rune_group_shorthand(runeGroup):
@@ -64,8 +73,6 @@ def get_defined_champ_role_weights():
     """
     Helper to get the defined score weights from the weight_config file.
     """
-    dataLocation = os.path.realpath(os.path.join(__location__, "../data"))
-    with open(os.path.join(dataLocation, 'weight_config.json'), 'r') as f:
-        weights = dict(json.load(f))
-        return weights
+    setup()
+    return WEIGHTS
 

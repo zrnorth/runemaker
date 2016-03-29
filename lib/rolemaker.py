@@ -5,7 +5,7 @@ import championgg_api
 import util
 import pprint
 
-def make_champ_list(champ_stats, numRoles):
+def make_champ_list(champ_stats, num):
     """
     Construct a list of champions for a role, based on
     a variety of statistics.
@@ -13,7 +13,7 @@ def make_champ_list(champ_stats, numRoles):
     """
     sort = sorted(list(champ_stats), key=lambda x: (champ_stats[x]['score']), reverse=True)
 
-    return sort[:numRoles]
+    return sort[:num]
 
 def calculate_score(champ_info):
     """
@@ -22,9 +22,9 @@ def calculate_score(champ_info):
     weights = util.get_defined_champ_role_weights()
 
     score = 0
-    score += champ_info['winPercent'] * weights['winrate']
-    score += champ_info['banPercent'] * weights['banrate']
-    score += champ_info['playPercent'] * weights['playrate']
+    score += champ_info['winrate'] * weights['winrate']
+    score += champ_info['banrate'] * weights['banrate']
+    score += champ_info['playrate'] * weights['playrate']
 
     return score
 
@@ -44,9 +44,9 @@ def get_role_stats(role):
         champion = entry['name']
         
         champ_info = {}
-        champ_info['winPercent'] = general['winPercent']
-        champ_info['playPercent'] = general['playPercent']
-        champ_info['banPercent'] = general['banRate']
+        champ_info['winrate'] = general['winPercent']
+        champ_info['playrate'] = general['playPercent']
+        champ_info['banrate'] = general['banRate']
         champ_info['overallPosition'] = general['overallPosition']
         champ_info['rank'] = rank_counter
         rank_counter += 1
@@ -59,18 +59,18 @@ def get_role_stats(role):
                 advanced_data = item
                 break
         
-        champ_info['pastPatchWinPercent'] = advanced_data['patchWin']
-        champ_info['pastPatchPlayPercent'] = advanced_data['patchPlay']
+        champ_info['pastPatchWinrate'] = advanced_data['patchWin']
+        champ_info['pastPatchPlayrate'] = advanced_data['patchPlay']
         champ_info['winrateByExperience'] = advanced_data['experienceRate']
        
-        adDmg = advanced_data['dmgComposition']['physicalDmg']
-        apDmg = advanced_data['dmgComposition']['magicDmg']
-        trueDmg = advanced_data['dmgComposition']['trueDmg']
+        ad_dmg = advanced_data['dmgComposition']['physicalDmg']
+        ap_dmg = advanced_data['dmgComposition']['magicDmg']
+        true_dmg = advanced_data['dmgComposition']['trueDmg']
 
         # Could use tuning? Works for now.
-        if (adDmg + trueDmg > 70):
+        if (ad_dmg + true_dmg > 70):
             champ_info['dmgType'] = 'AD'
-        elif (apDmg + trueDmg > 70):
+        elif (ap_dmg + true_dmg > 70):
             champ_info['dmgType'] = 'AP'
         else:
             champ_info['dmgType'] = 'Hybrid'
@@ -88,8 +88,8 @@ def main():
     num = int(raw_input("Number of champs? "))
     champ_stats = get_role_stats(role)
 
-    top_five = make_champ_list(champ_stats, num)
-    print(top_five)
+    champ_list = make_champ_list(champ_stats, num)
+    print(champ_list)
 
 if __name__ == "__main__":
     main()
