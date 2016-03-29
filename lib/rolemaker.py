@@ -2,18 +2,18 @@
 Contains the logic to make a role champ set based on player input.
 """
 import championgg_api
-import util
 import pprint
+import statistics
+import time
+import util
 
-def make_champ_list(champ_stats, num):
+def make_champ_list(role_stats, num):
     """
     Construct a list of champions for a role, based on
     a variety of statistics.
 
     """
-    sort = sorted(list(champ_stats), key=lambda x: (champ_stats[x]['score']), reverse=True)
-
-    return sort[:num]
+    return sorted(list(role_stats), key=lambda x: (role_stats[x]['score']), reverse=True)[:num]
 
 def calculate_score(champ_info):
     """
@@ -28,6 +28,20 @@ def calculate_score(champ_info):
 
     return score
 
+def get_stats_for_field(role_stats, field):
+    """
+    Calculate some simple stats for a given field in our champ_stats dataset.
+    """
+    l = []
+    for champ in role_stats:
+        l.append(role_stats[champ][field])
+    
+    return {
+        "mean": str(statistics.mean(l)),
+        "median": str(statistics.median(l)),
+        "stddev": str(statistics.stdev(l))
+    }
+
 def get_role_stats(role):
     """
     Get the role statistics for each of the champs with the top 
@@ -35,13 +49,27 @@ def get_role_stats(role):
     """
     role_stats = {}
     rank_counter = 1
+
     # Get the top 50 champs by winrate for the role
-    data = dict(championgg_api.get_stats_for_role(role))['data']
+    response = dict(championgg_api.get_stats_for_role(role))
+    # If got empty response, wait a second and try again
+    while response is False:
+        print("Got empty result. Retrying...")
+        time.sleep(1)
+        response = dict(championgg_api.get_stats_for_role(role))
+    
+    if 'error' in response:
+        print(response['error']['message'])
+        return {}
+
+    data = response['data']
     for entry in data:
         # Fill out the entry with simple data at first.
         general = entry['general']
         championInternalName = entry['key']
         champion = entry['name']
+
+        print(champion + "...")
         
         champ_info = {}
         champ_info['winrate'] = general['winPercent']
@@ -62,7 +90,7 @@ def get_role_stats(role):
         champ_info['pastPatchWinrate'] = advanced_data['patchWin']
         champ_info['pastPatchPlayrate'] = advanced_data['patchPlay']
         champ_info['winrateByExperience'] = advanced_data['experienceRate']
-       
+
         ad_dmg = advanced_data['dmgComposition']['physicalDmg']
         ap_dmg = advanced_data['dmgComposition']['magicDmg']
         true_dmg = advanced_data['dmgComposition']['trueDmg']
@@ -74,22 +102,29 @@ def get_role_stats(role):
             champ_info['dmgType'] = 'AP'
         else:
             champ_info['dmgType'] = 'Hybrid'
-        
-        champ_info['score'] = calculate_score(champ_info)
-
-        print(champion + " | " + str(champ_info['score']))
 
         role_stats[champion] = champ_info
+    
+    # Now that we have iterated all the champ_roles, get some generalized stats
+    agg_stats = {}
+    agg_stats['winrate'] = get_stats_for_field(role_stats, 'winrate')
+    agg_stats['playrate'] = get_stats_for_field(role_stats, 'playrate')
+    agg_stats['banrate'] = get_stats_for_field(role_stats, 'banrate')
 
-    return role_stats
+    # Finally, use these stats to calculate a score for each champ
+    for champ in role_stats:
+        role_stats[champ]['score'] = calculate_score(role_stats[champ])
+        print(champ + " | " + str(role_stats[champ]))
+
+    return (agg_stats, role_stats)
 
 def main():
     role = str(raw_input("Role? "))
     num = int(raw_input("Number of champs? "))
-    champ_stats = get_role_stats(role)
-
-    champ_list = make_champ_list(champ_stats, num)
+    agg_stats, role_stats = get_role_stats(role)
+    champ_list = make_champ_list(role_stats, num)
     print(champ_list)
+    print(agg_stats)
 
 if __name__ == "__main__":
     main()
