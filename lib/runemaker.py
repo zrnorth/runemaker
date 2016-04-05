@@ -2,9 +2,9 @@
 Contains the logic to make a rune set based on player input.
 """
 
-from . import championgg_api
-from . import riot_api
-from . import util
+from lib import championgg_api
+from lib import riot_api
+from lib import util
 
 def get_runes_for_champs(champions):
     """
@@ -76,11 +76,6 @@ def print_runepages(championList, maxPages):
         else:
             leftOut.append( (key, merged[key]) )
             
-    print("\n\nResults: ")
-    get_runepages_printer(results, 1)
-    if leftOut:
-        print("\nThese pages were left out: ")
-        get_runepages_printer(leftOut, 1+len(results))
        
 def get_runepages(championList, maxPages):
     """
@@ -101,7 +96,13 @@ def get_runepages(championList, maxPages):
             count += 1
         else:
             leftOut.append( (key, merged[key]) )
-            
+
+    print("\n\nResults: ")
+    get_runepages_printer(results, 1)
+    if leftOut:
+        print("\nThese pages were left out: ")
+        get_runepages_printer(leftOut, 1+len(results))
+           
     return { 'results': results, 'leftOut': leftOut }
     
 def get_champion_list():
@@ -119,4 +120,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    input()

@@ -1,5 +1,6 @@
 import sqlite3
 from flask import Flask, redirect, url_for, render_template, request
+from lib import rolemaker
 from lib import runemaker
 
 # config
@@ -33,11 +34,21 @@ def get_rune_pages():
          
     runeData = runemaker.get_runepages(champNames, numPages)
 
-    return render_template('results.html', champNames=champNames, numPages=numPages, results=runeData['results'], leftOut=runeData['leftOut'])
+    return render_template('rune_results.html', champNames=champNames, numPages=numPages, results=runeData['results'], leftOut=runeData['leftOut'])
 
 @app.route('/rolemaker')
 def show_roles():
     return render_template('rolemaker.html')
-    
+
+@app.route('/getRoles', methods=['POST'])
+def get_roles():
+    role = request.form['roleName']
+    num = int(request.form['num'])
+
+    aggStats, roleStats = rolemaker.get_role_stats(role)
+    champPool = rolemaker.make_champ_pool(role, roleStats, num)
+
+    return render_template('role_results.html', num=num, champPool=champPool, roleStats=roleStats)
+
 if __name__=='__main__':
     app.run()

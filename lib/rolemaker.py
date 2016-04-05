@@ -1,17 +1,16 @@
 """
 Contains the logic to make a role champ set based on player input.
 """
-import championgg_api
 import pprint
 import statistics
 import time
-import util
+from lib import championgg_api
+from lib import util
 
 def make_champ_pool(role, role_stats, num):
     """
     Construct a list of champions for a role.
     """
-
     # ideally we want to have champs from at least 2 / 3 of the major types (AP, AD, Hybrid).
     # However, if we are playing ADC / Support, or we have num = 1, this doesn't really matter
     # - just return the best champs based on overall score.
@@ -36,10 +35,6 @@ def make_champ_pool(role, role_stats, num):
     ad.sort(key=lambda x: x[1], reverse=True)
     ap.sort(key=lambda x: x[1], reverse=True)
     hybrid.sort(key=lambda x: x[1], reverse=True)
-
-    print(ad)
-    print(ap)
-    print(hybrid)
 
     pool = []
     got_ad = False
@@ -219,8 +214,8 @@ def get_role_stats(role):
     return (agg_stats, role_stats)
 
 def main():
-    role = str(raw_input("Role? "))
-    num = int(raw_input("Number of champs? "))
+    role = input("Role? ")
+    num = int(input("Number of champs? "))
     agg_stats, role_stats = get_role_stats(role)
     champ_pool = make_champ_pool(role, role_stats, num)
     print("Your champ pool is: " + ", ".join(champ_pool))

@@ -1,0 +1,21 @@
+{% extends "_base.html" %}
+{% block content %}
+    {% if num == 1000 %}
+        <h2>Here are all the champs for your role, scored and ranked.</h2>
+    {% else %}
+        <h2>Here are your {{ num }} champs for your role.</h2>
+    {% endif %}
+
+    <ol>
+        {% for champ in champPool %}
+        <li> {{ champ }} 
+            <ul>
+                <li>
+                    Score: {{ roleStats[champ]['score'] }}
+                </li>
+            </ul>
+        {% endfor %}
+    </ol>
+
+    <h3>Score is calculated based on winrate, banrate, & playrate.</h3>
+{% endblock %}
