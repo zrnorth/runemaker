@@ -46,43 +46,52 @@ def make_champ_pool(role, role_stats, num):
     got_ap = False
     got_hybrid = False
 
-    while len(pool) < num - 1:
-        highest_ad = ad[0][1]
-        highest_ap = ap[0][1]
-        highest_hybrid = hybrid[0][1]
+    while len(pool) < num:
+        highest_ad = ad[0][1] if len(ad) > 0 else -999999
+        highest_ap = ap[0][1] if len(ap) > 0 else -999999
+        highest_hybrid = hybrid[0][1] if len(hybrid) > 0 else -999999
 
         biggest = max(highest_ad, highest_ap, highest_hybrid)
-        if highest_ad == biggest:
+
+        # If we are on our last pick, and we still only have one type of dmg, we 
+        # should cheat and make sure we have a diversified champ pool.
+        if len(pool) == num-1:
+            if got_ad and not got_ap and not got_hybrid:
+                if (highest_ap > highest_hybrid):
+                    pool.append(ap[0][0])
+                else:
+                    pool.append(hybrid[0][0])
+                break
+            elif got_ad and got_ap and not got_hybrid:
+                if (highest_ad > highest_hybrid):
+                    pool.append(ad[0][0])
+                else:
+                    pool.append(hybrid[0][0])
+                break
+            elif not got_ad and not got_ap and got_hybrid:
+                if (highest_ad > highest_ap):
+                    pool.append(ad[0][0])
+                else:
+                    pool.append(ap[0][0])
+                break
+            # else: don't break, handle it like normal.
+
+        if highest_ad == biggest and highest_ad > -999999:
             pool.append(ad[0][0])
             got_ad = True
             del ad[0]
-        elif highest_ap == biggest:
+        elif highest_ap == biggest and highest_ap > -999999:
             pool.append(ap[0][0])
             got_ap = True
             del ap[0]
-        elif highest_hybrid == biggest:
+        elif highest_hybrid == biggest and highest_hybrid > -999999:
             pool.append(hybrid[0][0])
             got_hybrid = True
             del hybrid[0]
-    # We have one spot left -- if we are still all of one type now, need to get another one.
-    if got_ad and not got_ap and not got_hybrid:
-        if (ap[0][1] > hybrid[0][1]):
-            pool.append(ap[0][0])
-        else:
-            pool.append(hybrid[0][0])
-    if not got_ad and got_ap and not got_hybrid:
-        if (ad[0][1] > hybrid[0][1]):
-            pool.append(ad[0][0])
-        else:
-            pool.append(hybrid[0][0])
-    if not got_ad and not got_ap and got_hybrid:
-        if (ad[0][1] > ap[0][1]):
-            pool.append(ad[0][0])
-        else:
-            pool.append(ap[0][0])
+        else: # Reached the end of the champ list. There are none left
+            break
 
     return pool
-
 
 def calculate_score(champ_info, agg_stats):
     """
