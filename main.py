@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, redirect, url_for, render_template, request
+from flask import Flask, redirect, url_for, render_template, request, jsonify
 from lib import rolemaker
 from lib import runemaker
 
@@ -49,6 +49,15 @@ def get_roles():
     champPool = rolemaker.make_champ_pool(role, roleStats, num)
 
     return render_template('role_results.html', num=num, champPool=champPool, roleStats=roleStats)
+
+@app.route('/_getRolesAJAX')
+def get_roles_ajax():
+    role = request.args.get('roleName', '', type=str)
+    num = request.args.get('num', 0, type=int)
+
+    aggStats, roleStats = rolemaker.get_role_stats(role)
+    champPool = rolemaker.make_champ_pool(role, roleStats, num)
+    return jsonify(num=num, champPool=champPool, roleStats=roleStats)
 
 if __name__=='__main__':
     app.run()
