@@ -5,30 +5,10 @@
         <link rel="stylesheet" type=text/css href="static/style.css" />
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script type=text/javascript>
-        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-
-        $(function() {
-            $('button#calculate').bind('click', function() {
-                $('#result').text('');
-                $('button#calculate').attr('disabled', 'disabled');
-                $('button#calculate').text('Calculating...');
-
-                $.getJSON($SCRIPT_ROOT + '/_getRolesAJAX', {
-                    'roleName': $('select[name="roleName"]').find(":selected").text(),
-                    'num': $('select[name="num"]').find(":selected").value()
-                }, function(data) {
-                    $("<ol>").appendTo('#result');
-                    $.each( data.champPool, function(i, champ) {
-                        $("<li>").text(champ + "  |  Score: " + data.roleStats[champ]['score']).appendTo('#result ol');
-                    });
-
-                    $('button#calculate').removeAttr('disabled');
-                    $('button#calculate').text('Calculate');
-                });
-                return false;
-            });
-        });
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
         </script>
+        <script src="/static/rolemaker.js"></script>
+
         <title>Make something</title>
         {% endblock %}
     </head>

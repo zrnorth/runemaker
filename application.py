@@ -7,21 +7,21 @@ from lib import runemaker
 DEBUG = True
 
 # Create the app
-app = Flask(__name__)
-app.config.from_object(__name__)
+application = Flask(__name__)
+application.config.from_object(__name__)
 
 # ROUTING
-@app.route('/')
+@application.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/runemaker')
+@application.route('/runemaker')
 def show_entries():
     champNameZippedList = runemaker.get_champion_list()
     champNameZippedList.sort(key=lambda x: x[1])
     return render_template('runemaker.html', champNameZippedList=champNameZippedList)
     
-@app.route('/getRunePages', methods=['POST'])
+@application.route('/getRunePages', methods=['POST'])
 def get_rune_pages():
     champNames = request.form.getlist('champs')
     try:
@@ -36,11 +36,11 @@ def get_rune_pages():
 
     return render_template('rune_results.html', champNames=champNames, numPages=numPages, results=runeData['results'], leftOut=runeData['leftOut'])
 
-@app.route('/rolemaker')
+@application.route('/rolemaker')
 def show_roles():
     return render_template('rolemaker.html')
 
-@app.route('/getRoles', methods=['POST'])
+@application.route('/getRoles', methods=['POST'])
 def get_roles():
     role = request.form['roleName']
     num = int(request.form['num'])
@@ -50,7 +50,7 @@ def get_roles():
 
     return render_template('role_results.html', num=num, champPool=champPool, roleStats=roleStats)
 
-@app.route('/_getRolesAJAX')
+@application.route('/_getRolesAJAX')
 def get_roles_ajax():
     role = request.args.get('roleName', '', type=str)
     num = request.args.get('num', 0, type=int)
@@ -60,4 +60,4 @@ def get_roles_ajax():
     return jsonify(num=num, champPool=champPool, roleStats=roleStats)
 
 if __name__=='__main__':
-    app.run()
+    application.run()
